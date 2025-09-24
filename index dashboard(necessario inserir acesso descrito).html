@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>InovaWeb - Dashboard SPA</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card-bg: #fff;
+            --text: #222;
+            --primary: #0066ff;
+            --accent: #00a86b;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f1720;
+            --card-bg: #0b1220;
+            --text: #e6eef8;
+            --primary: #4da3ff;
+            --accent: #57d39f;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            transition: background .2s, color .2s;
+        }
+
+        .card {
+            background: var(--card-bg);
+            transition: background .2s, color .2s;
+        }
+
+        .brand {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Focus visibility for accessibility */
+        a:focus,
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 3px solid rgba(0, 123, 255, .25);
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode */
+        [data-high-contrast="true"] {
+            filter: contrast(1.3) saturate(1.1);
+        }
+
+        /* Small helpers */
+        .product-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .low-stock {
+            color: #d9534f;
+            font-weight: 700;
+        }
+
+        /* Table responsive tweak */
+        .table-responsive {
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            min-width: 220px;
+            max-width: 260px;
+        }
+
+        /* Header spacing for SPA views */
+        main {
+            padding-top: 1rem;
+        }
+
+        /* Accessibility control buttons */
+        .acc-controls button {
+            margin-right: .25rem;
+        }
+
+        /* Tiny on mobile */
+        @media (max-width:767px) {
+            #sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light" data-high-contrast="false">
+
+    <!-- Top Navbar (public + auth quick links) -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm" role="navigation" aria-label="Main Navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#home" aria-label="Ir para home">
+                <img src="img/imagem1.jpg" width="32" height="32"
+                    alt="Logo InovaWeb" class="me-2 rounded-circle">
+                <span class="brand">InovaWeb</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsMain"
+                aria-controls="navbarsMain" aria-expanded="false" aria-label="Abrir menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarsMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" role="menubar" aria-label="Menu principal">
+                    <li class="nav-item"><a class="nav-link" href="#home" role="menuitem">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#servicos" role="menuitem">Serviços</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#portfolio" role="menuitem">Portfólio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#sobre" role="menuitem">Sobre nós</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contato" role="menuitem">Contato</a></li>
+                </ul>
+
+                <div class="d-flex align-items-center">
+                    <!-- Accessibility Controls -->
+                    <div class="me-3 acc-controls" aria-hidden="false">
+                        <button id="btnAminus" class="btn btn-outline-secondary btn-sm"
+                            aria-label="Diminuir tamanho do texto">A-</button>
+                        <button id="btnAplus" class="btn btn-outline-secondary btn-sm"
+                            aria-label="Aumentar tamanho do texto">A+</button>
+                        <button id="btnContrast" class="btn btn-outline-secondary btn-sm" aria-pressed="false"
+                            aria-label="Ativar alto contraste">AC</button>
+                    </div>
+
+                    <!-- Theme toggle -->
+                    <div class="form-check form-switch me-3">
+                        <input class="form-check-input" type="checkbox" id="toggleDark" aria-label="Ativar modo escuro">
+                        <label class="form-check-label" for="toggleDark">Dark</label>
+                    </div>
+
+                    <!-- Auth -->
+                    <button id="btnOpenLogin" class="btn btn-primary me-2" aria-controls="app"
+                        aria-label="Fazer login">Login</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- Sidebar (desktop) -->
+            <aside id="sidebar" class="col-xl-2 col-lg-3 d-none d-lg-block bg-transparent pt-4"
+                aria-label="Navegação secundária">
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="#admin/dashboard" tabindex="0">Dashboard</a>
+                    <a class="nav-link" href="#admin/produtos" tabindex="0">Produtos</a>
+                    <a class="nav-link" href="#admin/vendas" tabindex="0">Vendas / Pedidos</a>
+                    <a class="nav-link" href="#admin/clientes" tabindex="0">Clientes</a>
+                    <a class="nav-link" href="#admin/relatorios" tabindex="0">Relatórios</a>
+                    <a class="nav-link" href="#admin/configuracoes" tabindex="0">Configurações</a>
+                </nav>
+            </aside>
+
+            <!-- Main SPA container -->
+            <main id="app" class="col-lg-9 col-xl-10 ms-auto p-4" tabindex="-1">
+                <!-- Views will be injected here -->
+            </main>
+        </div>
+    </div>
+
+    <!-- Login Modal (simples) -->
+    <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form id="formLogin" class="modal-content" aria-describedby="loginDesc">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLoginLabel">Entrar na InovaWeb</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="loginDesc" class="small text-muted">Use credenciais de exemplo para acessar a área
+                        administrativa (simulação).</p>
+
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">E-mail</label>
+                        <input id="inputEmail" class="form-control" required type="email" aria-required="true"
+                            placeholder="exemplo@inova.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPass" class="form-label">Senha</label>
+                        <input id="inputPass" class="form-control" required type="password" aria-required="true"
+                            placeholder="••••••">
+                    </div>
+                    <div class="form-text">Credenciais de teste: <strong>admin@inova.test</strong> /
+                        <strong>senha123</strong></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Edit/Create Modal -->
+    <div class="modal fade" id="modalProduct" tabindex="-1" aria-labelledby="modalProductLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form id="formProduct" class="modal-content" aria-describedby="productDesc">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalProductLabel">Novo Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="productDesc" class="small text-muted">Cadastre ou edite um produto. Campos com * são
+                        obrigatórios.</p>
+
+                    <input type="hidden" id="productId">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome *</label>
+                            <input id="productName" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Preço (R$) *</label>
+                            <input id="productPrice" class="form-control" required type="number" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estoque *</label>
+                            <input id="productStock" class="form-control" required type="number" min="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Imagem (URL) *</label>
+                            <input id="productImage" class="form-control" required placeholder="https://">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descrição</label>
+                            <textarea id="productDesc" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit">Salvar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Template for views (hidden) -->
+    <template id="tpl-public-home">
+        <section id="home" class="mb-4">
+            <div class="p-4 rounded-3 shadow-sm card">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1>InovaWeb</h1>
+                        <p class="lead">Soluções digitais para e-commerce e gestão de vendas — dashboards, lojas,
+                            relatórios e consultoria.</p>
+                        <p><a href="#admin/dashboard" class="btn btn-primary">Acessar Dashboard</a></p>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <img src="https://source.unsplash.com/collection/190727/800x600"
+                            alt="Equipe de desenvolvimento InovaWeb" class="img-fluid rounded"
+                            style="max-height:260px; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-public-servicos">
+        <section id="servicos" class="mb-4">
+            <div class="card p-4 shadow-sm">
+                <h2>Serviços</h2>
+                <p class="text-muted">Oferecemos:</p>
+                <div class="row gy-3">
+                    <div class="col-md-4">
+                        <div class="card p-3 h-100">
+                            <h5>Dashboard</h5>
+                            <p class="small">Painéis personalizados com métricas e relatórios.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 h-100">
+                            <h5>E-commerce</h5>
+                            <p class="small">Lojas online com checkout integrado e performance.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 h-100">
+                            <h5>Landing Pages</h5>
+                            <p class="small">Campanhas que convertem com design otimizado.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="card p-3 h-100">
+                            <h5>Relatórios</h5>
+                            <p class="small">Análises e relatórios exportáveis.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="card p-3 h-100">
+                            <h5>Consultoria</h5>
+                            <p class="small">Assessoria para otimizar operações e vendas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-public-portfolio">
+        <section id="portfolio" class="mb-4">
+            <div class="card p-4 shadow-sm">
+                <h2>Portfólio / Clientes</h2>
+                <p class="text-muted">Exemplos de projetos entregues:</p>
+                <div class="row gy-3">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <img src="https://source.unsplash.com/collection/1163637/600x400"
+                                alt="Projeto e-commerce exemplo" class="card-img-top" />
+                            <div class="card-body">
+                                <h5 class="card-title">E-commerce FastShop</h5>
+                                <p class="card-text small">Plataforma completa com integração a meios de pagamento.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <img src="https://source.unsplash.com/collection/190727/600x400" alt="Dashboard exemplo"
+                                class="card-img-top" />
+                            <div class="card-body">
+                                <h5 class="card-title">Painel Analytics</h5>
+                                <p class="card-text small">Relatórios de vendas e previsão de receita.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <img src="https://source.unsplash.com/collection/359251/600x400" alt="Landing page exemplo"
+                                class="card-img-top" />
+                            <div class="card-body">
+                                <h5 class="card-title">Landing Campaign</h5>
+                                <p class="card-text small">Conversão otimizada para campanhas sazonais.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-public-sobre">
+        <section id="sobre" class="mb-4">
+            <div class="card p-4 shadow-sm">
+                <h2>Sobre nós</h2>
+                <p>História, missão e equipe.</p>
+                <div class="row gy-3">
+                    <div class="col-md-6">
+                        <h5>Missão</h5>
+                        <p class="small text-muted">Ajudar negócios a crescer com soluções digitais confiáveis.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Equipe</h5>
+                        <p class="small text-muted">Designers, desenvolvedores e analistas focados em resultados.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-public-contato">
+        <section id="contato" class="mb-4">
+            <div class="card p-4 shadow-sm">
+                <h2>Contato</h2>
+                <div class="row gy-3">
+                    <div class="col-md-6">
+                        <form id="formContato" aria-label="Formulário de contato">
+                            <div class="mb-3">
+                                <label for="contNome" class="form-label">Nome</label>
+                                <input id="contNome" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contEmail" class="form-label">E-mail</label>
+                                <input id="contEmail" class="form-control" type="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contMsg" class="form-label">Mensagem</label>
+                                <textarea id="contMsg" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div><button class="btn btn-primary">Enviar</button></div>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Localização</h6>
+                        <!-- Map placeholder (use embed do Google Maps se quiser) -->
+                        <div role="img" aria-label="Mapa indicando localização da InovaWeb"
+                            class="rounded overflow-hidden mb-3"
+                            style="height:220px; background:linear-gradient(90deg,#eee,#ddd); display:flex; align-items:center; justify-content:center;">
+                            <div class="text-muted">Mapa (embed do Google Maps aqui)</div>
+                        </div>
+                        <a class="btn btn-success"
+                            href="https://api.whatsapp.com/send?phone=5511999999999&text=Ol%C3%A1%20InovaWeb!"
+                            target="_blank" rel="noopener" aria-label="Abrir WhatsApp">WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ADMIN: Dashboard view template -->
+    <template id="tpl-admin-dashboard">
+        <section id="admin-dashboard" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card p-3">
+                        <h6>Total de produtos</h6>
+                        <div id="statTotalProducts" class="h3">--</div>
+                        <small class="text-muted">Itens cadastrados</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3">
+                        <h6>Vendas no mês</h6>
+                        <div id="statSalesMonth" class="h3">--</div>
+                        <small class="text-muted">Pedidos confirmados</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3">
+                        <h6>Produtos com estoque baixo</h6>
+                        <div id="statLowStock" class="h3">--</div>
+                        <small class="text-muted">Itens abaixo do limite</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3">
+                        <h6>Receita (Mês)</h6>
+                        <div id="statRevenue" class="h3">R$ --</div>
+                        <small class="text-muted">Estimativa</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4 g-3">
+                <div class="col-lg-8">
+                    <div class="card p-3">
+                        <h6>Vendas Mensais</h6>
+                        <canvas id="chartRevenue" aria-label="Gráfico de receita mensal" role="img"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3">
+                        <h6>Top Produtos</h6>
+                        <ul id="topProducts" class="list-unstyled small mb-0"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ADMIN: Produtos view template -->
+    <template id="tpl-admin-produtos">
+        <section id="admin-produtos" class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Produtos</h3>
+                <div>
+                    <button id="btnNewProduct" class="btn btn-success" type="button">+ Novo Produto</button>
+                </div>
+            </div>
+
+            <!-- Search & filters -->
+            <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                    <input id="searchProducts" class="form-control" placeholder="Pesquisar por nome..."
+                        aria-label="Pesquisar produtos">
+                </div>
+                <div class="col-md-3">
+                    <select id="filterStock" class="form-select" aria-label="Filtrar por estoque">
+                        <option value="all">Todos os estoques</option>
+                        <option value="low">Estoque baixo (&lt;5)</option>
+                        <option value="out">Esgotados</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="sortProducts" class="form-select" aria-label="Ordenar produtos">
+                        <option value="name">Ordenar por nome</option>
+                        <option value="price_asc">Preço ↑</option>
+                        <option value="price_desc">Preço ↓</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Product cards -->
+            <div id="productCards" class="row gy-3"></div>
+
+            <!-- Table -->
+            <div class="mt-4 card p-3">
+                <h5>Tabela de produtos</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="small">
+                            <tr>
+                                <th scope="col">Imagem</th>
+                                <th scope="col">Nome</th>
+                                <th scope="col">Preço</th>
+                                <th scope="col">Estoque</th>
+                                <th scope="col">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ADMIN: Vendas template -->
+    <template id="tpl-admin-vendas">
+        <section id="admin-vendas" class="mb-4">
+            <h3>Vendas / Pedidos</h3>
+            <div class="card p-3">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Itens</th>
+                                <th>Total (R$)</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ADMIN: Clientes -->
+    <template id="tpl-admin-clientes">
+        <section id="admin-clientes" class="mb-4">
+            <h3>Clientes</h3>
+            <div class="card p-3">
+                <ul id="clientsList" class="list-group"></ul>
+            </div>
+        </section>
+    </template>
+
+    <!-- ADMIN: Relatórios -->
+    <template id="tpl-admin-relatorios">
+        <section id="admin-relatorios" class="mb-4">
+            <h3>Relatórios</h3>
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card p-3">
+                        <h6>Vendas por categoria</h6>
+                        <canvas id="chartByCategory" aria-label="Gráfico de vendas por categoria" role="img"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card p-3">
+                        <h6>Produtos mais vendidos</h6>
+                        <canvas id="chartTopProducts" aria-label="Gráfico de produtos mais vendidos"
+                            role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ADMIN: Configurações -->
+    <template id="tpl-admin-configuracoes">
+        <section id="admin-configuracoes" class="mb-4">
+            <h3>Configurações</h3>
+            <div class="card p-3">
+                <form id="formSettings">
+                    <div class="mb-3">
+                        <label class="form-label">Nome da empresa</label>
+                        <input id="settingCompany" class="form-control" value="InovaWeb">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Receber notificações por e-mail</label>
+                        <select id="settingNotify" class="form-select">
+                            <option value="1">Sim</option>
+                            <option value="0">Não</option>
+                        </select>
+                    </div>
+                    <div><button class="btn btn-primary">Salvar</button></div>
+                </form>
+            </div>
+        </section>
+    </template>
+
+    <!-- Bootstrap 5 JS bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        /************************************************************************
+         * InovaWeb - SPA Dashboard (vanilla JS)
+         *
+         * - Arquivo único contendo UI, templates, simulação de API (JSON),
+         *   navegação por hash routing, CRUD local, gráficos com Chart.js,
+         *   e controles de acessibilidade (modo escuro, alto contraste, A+/A-).
+         *
+         * Observações:
+         * - Troque imagens placeholders por imagens do seu servidor/Unsplash.
+         * - Substitua a "simulação API" (db.*) por chamadas fetch() quando integrar.
+         ************************************************************************/
+
+        // ---------- Simulação de "backend" (dados em memória -> JSON) ----------
+        const db = {
+            products: [
+                { id: 1, name: "Fone Bluetooth X200", price: 199.90, stock: 12, image: "https://source.unsplash.com/collection/190727/400x300", desc: "Fone com cancelamento de ruído", category: "eletronicos", sales: 45 },
+                { id: 2, name: "Cabo USB-C 1m", price: 29.90, stock: 3, image: "https://picsum.photos/seed/usb/400/300", desc: "Cabo resistente", category: "acessorios", sales: 120 },
+                { id: 3, name: "Bolsa Mochila Tech", price: 259.00, stock: 0, image: "https://picsum.photos/seed/bolsa/400/300", desc: "Mochila para notebook", category: "moda", sales: 23 },
+                { id: 4, name: "Teclado Mecânico RGB", price: 349.00, stock: 6, image: "https://picsum.photos/seed/teclado/400/300", desc: "Switches vermelho", category: "eletronicos", sales: 87 }
+            ],
+            clients: [
+                { id: 1, name: "Loja BomPreço", email: "contato@bompreco.com" },
+                { id: 2, name: "Moda Já", email: "vendas@modaja.com" }
+            ],
+            orders: [
+                { id: 101, client: "Loja BomPreço", items: 3, total: 789.50, date: "2025-09-01", status: "entregue" },
+                { id: 102, client: "Moda Já", items: 1, total: 259.00, date: "2025-09-03", status: "pago" }
+            ]
+        };
+
+        // Simula latency de API
+        function fakeApi(fn, delay = 350) {
+            return new Promise((resolve) => setTimeout(() => resolve(fn()), delay));
+        }
+
+        // API functions
+        const api = {
+            listProducts: () => fakeApi(() => db.products.slice()),
+            getProduct: (id) => fakeApi(() => db.products.find(p => p.id === Number(id))),
+            createProduct: (p) => fakeApi(() => {
+                p.id = Date.now();
+                db.products.push(p);
+                return p;
+            }),
+            updateProduct: (id, newP) => fakeApi(() => {
+                const idx = db.products.findIndex(x => x.id === Number(id));
+                if (idx > -1) { db.products[idx] = { ...db.products[idx], ...newP }; return db.products[idx]; }
+                return null;
+            }),
+            deleteProduct: (id) => fakeApi(() => {
+                const idx = db.products.findIndex(x => x.id === Number(id));
+                if (idx > -1) { db.products.splice(idx, 1); return true; }
+                return false;
+            }),
+            listClients: () => fakeApi(() => db.clients.slice()),
+            listOrders: () => fakeApi(() => db.orders.slice())
+        };
+
+        // ---------- App state ----------
+        const state = {
+            user: null, // after login simulated
+            products: [],
+            clients: [],
+            orders: [],
+            charts: {}
+        };
+
+        // ---------- Utility helpers ----------
+        const $ = (sel, ctx = document) => ctx.querySelector(sel);
+        const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+        function money(v) { return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+        // ---------- Router (hash-based, simple) ----------
+        function router() {
+            const hash = location.hash.replace(/^#/, '') || 'home';
+            // If route begins with admin and user not logged, show login modal
+            if (hash.startsWith('admin') && !state.user) {
+                // open login modal
+                const modal = bootstrap.Modal.getOrCreateInstance($('#modalLogin'));
+                modal.show();
+                renderPublic('home');
+                return;
+            }
+
+            if (hash.startsWith('admin/')) {
+                const view = hash.split('/')[1] || 'dashboard';
+                renderAdmin(view);
+            } else {
+                renderPublic(hash);
+            }
+        }
+
+        window.addEventListener('hashchange', router);
+
+        // ---------- Rendering public pages ----------
+        const main = $('#app');
+
+        function renderPublic(viewName = 'home') {
+            main.innerHTML = '';
+            // decide which templates to render
+            const order = ['home', 'servicos', 'portfolio', 'sobre', 'contato'];
+            for (const name of order) {
+                const tpl = document.getElementById('tpl-public-' + name);
+                if (!tpl) continue;
+                // If the selected view is the current name OR viewName === 'home' render home only for home, etc.
+                if (viewName === name || (viewName === 'home' && name === 'home')) {
+                    main.appendChild(tpl.content.cloneNode(true));
+                } else {
+                    // Also append other sections as collapsible? For simplicity, append all but hidden if not active
+                    // We'll append only the requested view to keep it simple:
+                }
+            }
+            // After rendering public page, attach contact handler
+            const formContato = $('#formContato');
+            if (formContato) {
+                formContato.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    alert('Mensagem enviada! Obrigado, ' + $('#contNome').value);
+                    formContato.reset();
+                });
+            }
+        }
+
+        // ---------- Rendering admin pages ----------
+        async function renderAdmin(view = 'dashboard') {
+            main.innerHTML = '';
+            // fetch fresh data
+            state.products = await api.listProducts();
+            state.clients = await api.listClients();
+            state.orders = await api.listOrders();
+
+            // choose template
+            const tpl = document.getElementById('tpl-admin-' + view);
+            if (!tpl) {
+                main.innerHTML = `<div class="card p-4"><h3>Página não encontrada</h3></div>`;
+                return;
+            }
+            main.appendChild(tpl.content.cloneNode(true));
+
+            // View-specific initializations
+            if (view === 'dashboard') initDashboard();
+            if (view === 'produtos') initProdutos();
+            if (view === 'vendas') initVendas();
+            if (view === 'clientes') initClientes();
+            if (view === 'relatorios') initRelatorios();
+            if (view === 'configuracoes') initConfiguracoes();
+            // move focus to main for accessibility
+            main.focus();
+        }
+
+        // ---------- Dashboard logic ----------
+        function initDashboard() {
+            // Stats
+            const totalProducts = state.products.length;
+            const lowStock = state.products.filter(p => p.stock > 0 && p.stock < 5).length;
+            const salesMonth = state.orders.length; // simple metric
+            const revenue = state.orders.reduce((s, o) => s + Number(o.total), 0);
+
+            $('#statTotalProducts').textContent = totalProducts;
+            $('#statLowStock').textContent = lowStock;
+            $('#statSalesMonth').textContent = salesMonth;
+            $('#statRevenue').textContent = money(revenue);
+
+            // Top products
+            const topList = $('#topProducts');
+            topList.innerHTML = '';
+            const top = state.products.slice().sort((a, b) => b.sales - a.sales).slice(0, 5);
+            for (const p of top) {
+                const li = document.createElement('li');
+                li.textContent = `${p.name} — ${p.sales} vendas`;
+                topList.appendChild(li);
+            }
+
+            // Revenue chart (monthly dummy)
+            const ctx = $('#chartRevenue');
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const data = months.map(() => Math.floor(Math.random() * 10000) + 2000); // dummy data
+            if (state.charts.revenue) state.charts.revenue.destroy();
+            state.charts.revenue = new Chart(ctx, {
+                type: 'line',
+                data: { labels: months, datasets: [{ label: 'Receita', data, tension: 0.3, fill: true }] },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // ---------- Produtos logic (CRUD + cards + tabela + busca/filtragem) ----------
+        function initProdutos() {
+            // Elements
+            const productCards = $('#productCards');
+            const productsTableBody = $('#productsTableBody');
+            const searchInput = $('#searchProducts');
+            const filterStock = $('#filterStock');
+            const sortSelect = $('#sortProducts');
+            const btnNew = $('#btnNewProduct');
+
+            // render functions
+            function renderCards(list) {
+                productCards.innerHTML = '';
+                for (const p of list) {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3';
+                    col.innerHTML = `
+          <div class="card h-100 p-2" tabindex="0" aria-label="${p.name}, preço ${p.price}, estoque ${p.stock}">
+            <img src="${p.image}" alt="${p.name}" class="product-img mb-2">
+            <div>
+              <h6>${p.name}</h6>
+              <div class="small">${money(p.price)}</div>
+              <div class="${p.stock === 0 ? 'low-stock' : 'text-muted'}">Estoque: ${p.stock}</div>
+              <div class="mt-2 d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${p.id}">Editar</button>
+                <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${p.id}">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `;
+                    productCards.appendChild(col);
+                }
+                // attach actions
+                $$('.btn-edit', productCards).forEach(b => b.addEventListener('click', () => openEdit(b.dataset.id)));
+                $$('.btn-delete', productCards).forEach(b => b.addEventListener('click', () => confirmDelete(b.dataset.id)));
+            }
+
+            function renderTable(list) {
+                productsTableBody.innerHTML = '';
+                for (const p of list) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td><img src="${p.image}" alt="${p.name}" style="width:60px; height:45px; object-fit:cover; border-radius:4px;"></td>
+          <td>${p.name}</td>
+          <td>${money(p.price)}</td>
+          <td>${p.stock}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${p.id}">Editar</button>
+            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${p.id}">Excluir</button>
+          </td>
+        `;
+                    productsTableBody.appendChild(tr);
+                }
+                // attach actions
+                $$('.btn-edit', productsTableBody).forEach(b => b.addEventListener('click', () => openEdit(b.dataset.id)));
+                $$('.btn-delete', productsTableBody).forEach(b => b.addEventListener('click', () => confirmDelete(b.dataset.id)));
+            }
+
+            // filter & sort pipeline
+            function getFiltered() {
+                const q = searchInput.value.trim().toLowerCase();
+                const stock = filterStock.value;
+                const sort = sortSelect.value;
+
+                let list = state.products.slice();
+
+                if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || (p.desc || '').toLowerCase().includes(q));
+                if (stock === 'low') list = list.filter(p => p.stock > 0 && p.stock < 5);
+                if (stock === 'out') list = list.filter(p => p.stock === 0);
+
+                if (sort === 'price_asc') list.sort((a, b) => a.price - b.price);
+                if (sort === 'price_desc') list.sort((a, b) => b.price - a.price);
+                if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+
+                return list;
+            }
+
+            // initial render
+            renderCards(getFiltered());
+            renderTable(getFiltered());
+
+            // attach search handlers
+            [searchInput, filterStock, sortSelect].forEach(el => el.addEventListener('input', () => {
+                const list = getFiltered();
+                renderCards(list);
+                renderTable(list);
+            }));
+
+            // New product button
+            btnNew.addEventListener('click', () => openEdit());
+
+            // Product modal
+            const modalProductEl = $('#modalProduct');
+            const modalProductInstance = new bootstrap.Modal(modalProductEl);
+            const formProduct = $('#formProduct');
+
+            function openEdit(id) {
+                const title = $('#modalProductLabel');
+                $('#productId').value = '';
+                $('#productName').value = '';
+                $('#productPrice').value = '';
+                $('#productStock').value = '';
+                $('#productImage').value = '';
+                $('#productDesc').value = '';
+
+                if (id) {
+                    const p = state.products.find(x => x.id === Number(id));
+                    if (!p) return alert('Produto não encontrado');
+                    $('#productId').value = p.id;
+                    $('#productName').value = p.name;
+                    $('#productPrice').value = p.price;
+                    $('#productStock').value = p.stock;
+                    $('#productImage').value = p.image;
+                    $('#productDesc').value = p.desc || '';
+                    title.textContent = 'Editar Produto';
+                } else {
+                    title.textContent = 'Novo Produto';
+                }
+                modalProductInstance.show();
+            }
+
+            formProduct.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = $('#productId').value;
+                const payload = {
+                    name: $('#productName').value.trim(),
+                    price: parseFloat($('#productPrice').value),
+                    stock: parseInt($('#productStock').value),
+                    image: $('#productImage').value,
+                    desc: $('#productDesc').value
+                };
+                if (!payload.name) return alert('Nome obrigatório');
+
+                if (id) {
+                    await api.updateProduct(id, payload);
+                } else {
+                    await api.createProduct(payload);
+                }
+                // refresh local state & UI
+                state.products = await api.listProducts();
+                renderCards(getFiltered());
+                renderTable(getFiltered());
+                modalProductInstance.hide();
+            });
+
+            async function confirmDelete(id) {
+                if (!confirm('Deseja excluir este produto?')) return;
+                await api.deleteProduct(id);
+                state.products = await api.listProducts();
+                renderCards(getFiltered());
+                renderTable(getFiltered());
+            }
+        }
+
+        // ---------- Vendas (Pedidos) ----------
+        function initVendas() {
+            const tbody = $('#ordersBody');
+            tbody.innerHTML = '';
+            for (const o of state.orders) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+        <td>#${o.id}</td>
+        <td>${o.client}</td>
+        <td>${o.items}</td>
+        <td>${money(o.total)}</td>
+        <td>${o.date}</td>
+        <td><span class="badge bg-info text-dark">${o.status}</span></td>
+      `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // ---------- Clientes ----------
+        function initClientes() {
+            const list = $('#clientsList');
+            list.innerHTML = '';
+            for (const c of state.clients) {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `<div><strong>${c.name}</strong><br><small class="text-muted">${c.email}</small></div>
+                      <div><button class="btn btn-sm btn-outline-secondary">Ver</button></div>`;
+                list.appendChild(li);
+            }
+        }
+
+        // ---------- Relatórios ----------
+        function initRelatorios() {
+            // Chart: Vendas por categoria (sum sales per category)
+            const ctxCat = $('#chartByCategory');
+            const categories = {};
+            for (const p of state.products) {
+                categories[p.category] = (categories[p.category] || 0) + (p.sales || 0);
+            }
+            const labels = Object.keys(categories);
+            const data = labels.map(l => categories[l]);
+
+            if (state.charts.byCategory) state.charts.byCategory.destroy();
+            state.charts.byCategory = new Chart(ctxCat, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ label: 'Vendas', data }] },
+                options: { responsive: true }
+            });
+
+            // Chart: Top Products
+            const ctxTop = $('#chartTopProducts');
+            const top = state.products.slice().sort((a, b) => b.sales - a.sales).slice(0, 5);
+            if (state.charts.topProducts) state.charts.topProducts.destroy();
+            state.charts.topProducts = new Chart(ctxTop, {
+                type: 'bar',
+                data: { labels: top.map(p => p.name), datasets: [{ label: 'Vendas', data: top.map(p => p.sales) }] },
+                options: { responsive: true, indexAxis: 'y' }
+            });
+        }
+
+        // ---------- Configurações ----------
+        function initConfiguracoes() {
+            const form = $('#formSettings');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Configurações salvas (simulado).');
+            });
+        }
+
+        // ---------- Login handling (simulado) ----------
+        (function attachAuth() {
+            const modalEl = $('#modalLogin');
+            const modal = new bootstrap.Modal(modalEl);
+            $('#btnOpenLogin').addEventListener('click', () => {
+                modal.show();
+            });
+
+            $('#formLogin').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = $('#inputEmail').value.trim();
+                const pass = $('#inputPass').value.trim();
+                // simple check for demo
+                if (email === 'admin@inova.test' && pass === 'senha123') {
+                    state.user = { name: 'Admin', email };
+                    modal.hide();
+                    // redirect to dashboard
+                    location.hash = 'admin/dashboard';
+                } else {
+                    alert('Credenciais inválidas (use admin@inova.test / senha123)');
+                }
+            });
+        })();
+
+        // ---------- Accessibility controls ----------
+        (function accessibility() {
+            const body = document.body;
+            const btnAplus = $('#btnAplus');
+            const btnAminus = $('#btnAminus');
+            const btnContrast = $('#btnContrast');
+            const toggleDark = $('#toggleDark');
+
+            btnAplus.addEventListener('click', () => {
+                const size = Number(getComputedStyle(document.documentElement).getPropertyValue('--scale') || 1) + 0.1;
+                document.documentElement.style.fontSize = (parseFloat(getComputedStyle(document.documentElement).fontSize) + 1) + 'px';
+            });
+            btnAminus.addEventListener('click', () => {
+                document.documentElement.style.fontSize = (parseFloat(getComputedStyle(document.documentElement).fontSize) - 1) + 'px';
+            });
+            btnContrast.addEventListener('click', () => {
+                const curr = body.getAttribute('data-high-contrast') === 'true';
+                body.setAttribute('data-high-contrast', (!curr).toString());
+                btnContrast.setAttribute('aria-pressed', (!curr).toString());
+            });
+            // theme toggle
+            // persist theme preference in localStorage
+            const savedTheme = localStorage.getItem('inovaw_theme');
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+                toggleDark.checked = savedTheme === 'dark';
+            }
+            toggleDark.addEventListener('change', (e) => {
+                const t = e.target.checked ? 'dark' : 'light';
+                body.setAttribute('data-theme', t);
+                localStorage.setItem('inovaw_theme', t);
+            });
+        })();
+
+        // ---------- Init app ----------
+        // Add listeners for global links (public menu)
+        (function attachMenuLinks() {
+            $$('.nav-link').forEach(a => {
+                a.addEventListener('click', (e) => {
+                    // smooth scroll to top of main
+                    // allow normal hash routing
+                });
+            });
+        })();
+
+        // initial route
+        router();
+
+        // If user logs in/out update UI (for demo we show login button/presence)
+        // (Extra: you could show user avatar, logout, etc.)
+
+    </script>
+</body>
+
+</html>
