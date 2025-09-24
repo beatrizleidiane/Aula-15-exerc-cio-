@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>InovaWeb - Soluções digitais</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- AOS (Animação ao rolar) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Seus CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body class="light-mode">
+    
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary p-3 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">InovaWeb</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="servicos.html">Serviços</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contato.html">Contato</a></li>
+                    <!-- Novo item do menu -->
+                    <li class="nav-item"><a class="nav-link" href="solicitacao.html">Solicitações</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero d-flex align-items-center text-center text-white">
+        <div class="container" data-aos="fade-up">
+            <h1 class="fw-bold display-4">Bem-vindo à InovaWeb</h1>
+            <p class="lead mb-4">Soluções digitais para e-commerce e gestão de vendas</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="servicos.html" class="btn btn-lg btn-light fw-bold">Conheça nossos serviços</a>
+                <!-- Novo botão para solicitações -->
+                <a href="solicitacao.html" class="btn btn-lg btn-warning fw-bold">Fazer solicitação extra</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sobre nós -->
+    <section class="py-5 bg-white">
+        <div class="container">
+            <h2 class="text-center mb-5 fw-bold" data-aos="fade-up">Sobre nós</h2>
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card shadow-lg border-0 h-100 text-center p-4">
+                        <h5 class="fw-bold mb-3">Inovação</h5>
+                        <p>Criamos soluções digitais modernas e escaláveis para empresas de todos os tamanhos.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card shadow-lg border-0 h-100 text-center p-4">
+                        <h5 class="fw-bold mb-3">Performance</h5>
+                        <p>Sites rápidos e otimizados para SEO, garantindo melhor alcance e resultados.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card shadow-lg border-0 h-100 text-center p-4">
+                        <h5 class="fw-bold mb-3">Suporte</h5>
+                        <p>Acompanhamos cada cliente, oferecendo suporte contínuo e personalizado.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfólio / Clientes -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5 fw-bold" data-aos="fade-up">Nossos clientes</h2>
+            <div class="row g-4 text-center">
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon"
+                        class="img-fluid portfolio-logo">
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix"
+                        class="img-fluid portfolio-logo">
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple"
+                        class="img-fluid portfolio-logo">
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" alt="IBM"
+                        class="img-fluid portfolio-logo">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+
+    
+    <footer class="footer py-4 text-center text-white">
+        <p class="mb-2">© 2025 InovaWeb - Todos os direitos reservados</p>
+        <div class="mb-2">
+            <button class="btn btn-sm btn-light me-2" onclick="toggleDarkMode()">🌙 Tema</button>
+            <button class="btn btn-sm btn-light me-2" onclick="increaseFont()">A+</button>
+            <button class="btn btn-sm btn-light" onclick="decreaseFont()">A-</button>
+        </div>
+        <div>
+            <a href="#" class="text-white me-3"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-white me-3"><i class="bi bi-linkedin"></i></a>
+            <a href="#" class="text-white"><i class="bi bi-github"></i></a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        AOS.init({ duration: 1000, once: true });
+    </script>
+</body>
+
+</html>
